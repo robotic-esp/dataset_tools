@@ -9,7 +9,7 @@ w = waitbar(0, '');
 for i=1:size(vicon_data,1)
     ind = find(contains(vicon_objs, vicon_data{i,3}));
     vicon_trajectories{ind}{end+1,1} = reshape(vicon_data{i,11:end}',4,4)';
-    waitbar(i/size(vicon_data,1),w, [num2str(i/size(vicon_data,1)) ' entries read']);
+    waitbar(i/size(vicon_data,1),w, [num2str(i) '/' num2str(size(vicon_data,1)) ' entries read']);
 end
 close(w);
 vicon_timestamps = vicon_data{1:length(vicon_trajectories):end,1} + vicon_data{1:length(vicon_trajectories):end,2}/1e9;
