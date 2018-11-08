@@ -1,4 +1,20 @@
 function [vicon_trajectories, vicon_timestamps] = ingest_vicon_data(filename)
+%
+% Parses vicon data from input csv into trajectory and timestamp data.
+%
+% From: Kevin M. Judd and Jonathan D. Gammell, 
+%       The Oxford Multimotion Dataset: Multiple SE(3) Motions with Ground Truth
+%       kjudd@robots.ox.ac.uk, gammell@robots.ox.ac.uk
+%
+% input:
+%   filename: input csv filename
+%
+% output:
+%   vicon_trajectories: Mx1 cell array of the M objects tracked in the
+%   vicon file, where each cell contains a Kx1 cell array of global 4x4
+%   transformation matrices representing each trajectory
+%   vicon_timestamps: Kx1 vector of timestamps
+%
 
 % load vicon data
 vicon_data = readtable(filename);
