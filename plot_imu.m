@@ -1,4 +1,4 @@
-function [] = plot_imu(lin_acc, quaternions)
+function [] = plot_imu(lin_acc, ang_vel, quaternions)
 %
 % Plots the linear acceleration vector, and rotation quaternion as recorded
 % by the imu.
@@ -21,28 +21,81 @@ end
 neg_bound = @(x) min(0, max(-inf, x));
 pos_bound = @(x) min(inf, max(0, x));
 
-axis_lims = [neg_bound(min(lin_acc(:,1))) pos_bound(max(lin_acc(:,1))) neg_bound(min(lin_acc(:,2))) ...
-             pos_bound(max(lin_acc(:,2))) neg_bound(min(lin_acc(:,3))) pos_bound(max(lin_acc(:,3)))];
+axis_lims = [neg_bound(min(lin_acc(:,2))) pos_bound(max(lin_acc(:,2))) neg_bound(min(lin_acc(:,1))) ...
+             pos_bound(max(lin_acc(:,1))) neg_bound(min(lin_acc(:,3))) pos_bound(max(lin_acc(:,3)))];
+axis_lims = [-1 1 -1 1 -1 1];
+
+subplot(1,2,1);
+xlabel('x (m/s)','HandleVisibility','off');
+ylabel('z (m/s)','HandleVisibility','off');
+zlabel('y (m/s)','HandleVisibility','off');
+title('Linear Acceleration','HandleVisibility','off')
+grid on;
+axis(10*[-1 1 -1 1 -1.5 0.5]);
+set(gca,'NextPlot','replacechildren') ;
+
+subplot(1,2,2);
+xlabel('x (rad/s)','HandleVisibility','off');
+ylabel('z (rad/s)','HandleVisibility','off');
+zlabel('y (rad/s)','HandleVisibility','off');
+title('Angular Velocity','HandleVisibility','off')
+grid on;
+axis(0.5*[-1 1 -1 1 -1 1]);
+set(gca,'NextPlot','replacechildren') ;
 
 for i = 1:10:size(lin_acc,1)
-    subplot(1,2,1);
-    quiver3(0, 0, 0, lin_acc(i,1), lin_acc(i,2), lin_acc(i,3),'LineWidth',5,'MaxHeadSize',1)
+    subplot(1,2,1);cla;
+    hold on
+    quiver3(0, 0, 0, lin_acc(i,1), lin_acc(i,3), lin_acc(i,2),'LineWidth',5,'MaxHeadSize',1,'Color','k','Autoscale','off');
+    plot3([0 lin_acc(i,1)], [0 0], [0 0],'LineWidth',3,'Color','r');
+    plot3([0 0], [0 lin_acc(i,3)], [0 0],'LineWidth',3,'Color','b');
+    plot3([0 0], [0 0], [0 lin_acc(i,2)],'LineWidth',3,'Color','g');
+    xlabel('x (m/s)','HandleVisibility','off');
+    ylabel('z (m/s)','HandleVisibility','off');
+    zlabel('y (m/s)','HandleVisibility','off');
+    title('Linear Acceleration','HandleVisibility','off')
     grid on;
-    axis(axis_lims);
+    axis(10*[-1 1 -1 1 -1.5 0.5]);
+    set(gca,'NextPlot','replacechildren') ;
+
     drawnow;
     
-    subplot(1,2,2);cla;
-    R = quaternion_to_rotation_matrix(quaternions(i,:));
-    T = [R [0; 0; 0;]; 0 0 0 1];
-    plot_axes3(T,0.25);
+    subplot(1,2,2);
+    cla;
+% %     R = quaternion_to_rotation_matrix(quaternions(i,:));
+%     C = quat2rotm([quaternions(i,4) quaternions(i,1:3)]);
+%     T = [C [0; 0; 0;]; 0 0 0 1];
+%     plot_axes3((T),0.25);
+% 
+%     grid on;
+%     axis(0.25*[-1 1 -1 1 -1 1]);
+%     xlabel('x');
+%     ylabel('y');
+%     zlabel('z');
+%     title('Rotation');
+%     xticklabels('');
+%     yticklabels('');
+%     zticklabels('');
+%     legend('x-axis','y-axis','z-axis','Location','Northeast');
+%     drawnow;
+    hold on
+    quiver3(0, 0, 0, ang_vel(i,1), ang_vel(i,3), ang_vel(i,2),'LineWidth',5,'MaxHeadSize',1,'Color','k','Autoscale','off');
+    plot3([0 ang_vel(i,1)], [0 0], [0 0],'LineWidth',3,'Color','r');
+    plot3([0 0], [0 ang_vel(i,3)], [0 0],'LineWidth',3,'Color','b');
+    plot3([0 0], [0 0], [0 ang_vel(i,2)],'LineWidth',3,'Color','g');
+    xlabel('x (rad/s)','HandleVisibility','off');
+    ylabel('z (rad/s)','HandleVisibility','off');
+    zlabel('y (rad/s)','HandleVisibility','off');
+    title('Angular Velocity','HandleVisibility','off')
     grid on;
     axis(0.5*[-1 1 -1 1 -1 1]);
-    drawnow;
-end
+    set(gca,'NextPlot','replacechildren') ;
 
 end
 
-function [R] = quaternion_to_rotation_matrix(q)
+end
+
+function [C] = quaternion_to_rotation_matrix(q)
 x = q(1); y = q(2); z = q(3); w = q(4);
 Nq = w*w + x*x + y*y + z*z;
 s = 2.0/Nq;
@@ -52,11 +105,10 @@ Z = z*s;
 wX = w*X; wY = w*Y; wZ = w*Z;
 xX = x*X; xY = x*Y; xZ = x*Z;
 yY = y*Y; yZ = y*Z; zZ = z*Z;
-R =  [1.0-(yY+zZ), xY-wZ, xZ+wY;
+C =  [1.0-(yY+zZ), xY-wZ, xZ+wY;
       xY+wZ, 1.0-(xX+zZ), yZ-wX;
       xZ-wY, yZ+wX, 1.0-(xX+yY)];
 end
-
 
 function [] = plot_axes3(T_j_from_i, varargin)
 % Draws 3D axes at the position and orientation given by T_j_from_i
@@ -74,12 +126,12 @@ function [] = plot_axes3(T_j_from_i, varargin)
     if nargin < 1
         return
     elseif nargin == 1
-        colors = 'brg';
+        colors = 'rgb';
         scale = 2;
         thickness = 2;
     elseif nargin == 2
         scale = varargin{1};
-        colors = 'brg';
+        colors = 'rgb';
         thickness = 2; 
     elseif nargin == 3
         scale = varargin{1};
@@ -95,7 +147,7 @@ function [] = plot_axes3(T_j_from_i, varargin)
                  0 0 0 1;
                  1/scale 1/scale 1/scale 1/scale];
     if(ischar(colors))
-     colors = colors';
+        colors = colors';
     end
     axes_in_j = (T_j_from_i*axes_in_i);
     holdstate = ishold;
