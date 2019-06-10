@@ -30,11 +30,7 @@ elseif nargin == 2
     allow_translation = true;
 end
 
-if(allow_translation)
-    error_se3 = @(T_A_from_B) 0.5*(SE3_to_se3_lie(T_A_from_B)' * SE3_to_se3_lie(T_A_from_B));
-else
-    error_se3 = @(T_A_from_B) 0.5*(([0 0 0 1 1 1]' .* SE3_to_se3_lie(T_A_from_B))' * ([0 0 0 1 1 1]' .* SE3_to_se3_lie(T_A_from_B)));
-end
+error_se3 = @(T_A_from_B) 0.5*(([0 0 0 1 1 1]' .* SE3_to_se3_lie(T_A_from_B))' * ([0 0 0 1 1 1]' .* SE3_to_se3_lie(T_A_from_B)));
 error_function = @(T_A_from_B, T_A, T_B) error_se3(T_A_from_B * T_B * invT(T_A_from_B) * invT(T_A));
 accum_error_se3 = @(xi_A_from_B, T_A_cell, T_B_cell) sum(cellfun(@(T_A, T_B) error_function(se3_lie_to_SE3(xi_A_from_B), T_A, T_B), T_A_cell, T_B_cell));
 
@@ -42,6 +38,15 @@ xi = [0 0 0 0 0 0]'; % identity
 options = optimoptions(@fminunc,'Display','off','Algorithm','quasi-newton');
 to_minimize = @(x) accum_error_se3(x, transforms_A, transforms_B);
 xi = fminunc(to_minimize, xi, options);
+
+if(allow_translation)
+    error_se3 = @(T_A_from_B) 0.5*(SE3_to_se3_lie(T_A_from_B)' * SE3_to_se3_lie(T_A_from_B));
+    error_function = @(T_A_from_B, T_A, T_B) error_se3(T_A_from_B * T_B * invT(T_A_from_B) * invT(T_A));
+    accum_error_se3 = @(xi_A_from_B, T_A_cell, T_B_cell) sum(cellfun(@(T_A, T_B) error_function(se3_lie_to_SE3(xi_A_from_B), T_A, T_B), T_A_cell, T_B_cell));
+    to_minimize = @(x) accum_error_se3(x, transforms_A, transforms_B);
+    xi = fminunc(to_minimize, xi, options);
+end
+
 T_A_from_B = se3_lie_to_SE3(xi);
 end
 

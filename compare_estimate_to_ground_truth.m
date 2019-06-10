@@ -1,4 +1,4 @@
-function [max_xyz_error, max_xyz_percent_error, max_rpy_error, avg_xyz_error, avg_rpy_error] = compare_estimate_to_ground_truth(trajectory_estimate, trajectory_gt, body_frame, path_label, T_estimate_from_gt)
+function [max_xyz_error, max_xyz_percent_error, max_rpy_error, avg_xyz_error, avg_rpy_error] = compare_estimate_to_ground_truth(trajectory_estimate, trajectory_gt, body_frame, path_label, as_percentage, T_estimate_from_gt)
 
 if(length(trajectory_estimate) ~= length(trajectory_gt))
     error('Mismatched lengths');
@@ -10,10 +10,11 @@ for i = 1:length(trajectory_estimate)
     if(body_frame)
         T_err = invT(trajectory_estimate{i}) * T_estimate_from_gt * trajectory_gt{i} * invT(T_estimate_from_gt);
     else
-        T_err = invT(invT(T_estimate_from_gt) * trajectory_estimate{i} * T_estimate_from_gt) * trajectory_gt{i};
+        T_err = invT(T_estimate_from_gt) * trajectory_estimate{i} * T_estimate_from_gt * invT(trajectory_gt{i});
     end
     
-    xyz_err(i,:) = T_err(1:3,4)';
+    tmp = get_r_j_from_i_in_i_FROM_T_ji(T_err);
+	xyz_err(i,:) = tmp(1:3);
     rpy_err(i,:) = C2rpy(T_err(1:3,1:3))';
 end
 
@@ -21,6 +22,11 @@ if(path_label)
     path = total_path_length(trajectory_gt);
 else
     path = 1:length(trajectory_estimate);
+end
+
+if(as_percentage)
+    tmp = total_path_length(trajectory_gt);
+    xyz_err(2:end,:) = xyz_err(2:end,:) ./ tmp(2:end,:) * 100;
 end
 
 [max_xyz_error, i] = max(sqrt(sum(xyz_err.^2,2)));
@@ -35,9 +41,14 @@ subplot(2,1,1);
 co = [1 0 0; 0 1 0; 0 0 1];
 old_co = get(groot, 'defaultAxesColorOrder');
 set(groot,'defaultAxesColorOrder',co);
+hold on
 plot(path, xyz_err)
 set(gca, 'Box', 'off');
-ylabel('Tran. Error (m)')
+if(as_percentage)
+    ylabel('Tran. Error (% total path)')
+else
+    ylabel('Tran. Error (m)')
+end
 legend({'x','y','z'}, 'Location', 'Southwest', 'Orientation','horizontal');
 box off
 xticklabels([])
@@ -45,6 +56,7 @@ xlim([0, path(end)]);
 
 
 subplot(2,1,2);
+hold on
 set(groot,'defaultAxesColorOrder',co);
 plot(path, rpy_err)
 ylabel('Rot. Error (rad)')
@@ -69,6 +81,7 @@ end
 xlim([0, path(end)]);
 
 set(groot, 'defaultAxesColorOrder', old_co);
+linkaxes([subplot(2,1,1),subplot(2,1,2)], 'x');
 
 end
 

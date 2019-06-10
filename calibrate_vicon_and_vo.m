@@ -1,12 +1,12 @@
 % load vo data
 vo_data = {eye(4)}; % load in VO data
-vo_timestamps = readtable('stereo.csv');
-start_index = 500;
+vo_timestamps_data = readtable('stereo.csv');
+start_index = 100;
 end_index = start_index + 923;
-vo_timestamps = vo_timestamps{start_index:end_index,2} + vo_timestamps{start_index:end_index,3}/1e9; 
+vo_timestamps = vo_timestamps_data{start_index:end_index,2} + vo_timestamps_data{start_index:end_index,3}/1e9; 
 vo_data_norm = cell(size(vo_data));
 for i = 2:length(vo_timestamps)
-    vo_data_norm{i-1,1} = invT(vo_data{i}) * vo_data{start_index};
+    vo_data_norm{i-1,1} = orthonormalize_svd(invT(vo_data{i}) * vo_data{start_index});
 end
 
 % load vicon data
@@ -52,7 +52,7 @@ for i = 1:length(vo_timestamps)-1
         current_vicon = current_vicon + 1;
     end
     for j = 1:length(vicon_data_norm)
-        vicon_data_norm{j}{end+1,1} = invT(vicon_trajectory{j}{current_vicon}) * vicon_trajectory{j}{start_vicon};
+        vicon_data_norm{j}{end+1,1} = orthonormalize_svd(invT(vicon_trajectory{j}{current_vicon}) * vicon_trajectory{j}{start_vicon});
     end
 end
 
@@ -66,7 +66,7 @@ for j = 1:length(vicon_data_norm)
 end
 figure(); hold on;
 for j = 1:length(vicon_data_norm)
-    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:),'k')
+    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:))
 end
 axis equal
 to_plot = cell(size(vo_data_norm));
@@ -92,7 +92,7 @@ for j = 1:length(vo_data_norm)
 end
 hold on;
 for j = 1:length(vo_data_norm)
-    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:),'b')
+    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:),'g')
 end
 axis equal
 

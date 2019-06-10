@@ -1,4 +1,4 @@
-function [] = plot_trajectory(trajectory)
+function [] = plot_single_trajectory(trajectory)
 %
 % Plots the motion history defined by trajectory, including 3-D axes at the
 % final position and orientation of the trajectory.
@@ -18,6 +18,7 @@ pts = zeros(4,length(trajectory));
 for i = 1:length(trajectory)
     pts(:,i) = get_r_j_from_i_in_i_FROM_T_ji(invT(trajectory{i}));
 end
+
 plot3(pts(1,1:i),pts(2,1:i),pts(3,1:i))
 plot_axes3(trajectory{i},0.25);
 
@@ -66,24 +67,24 @@ function [] = plot_axes3(T_j_from_i, varargin)
         colors = varargin{2};
         thickness = varargin{3};
     end
-    axes_in_i = scale * [0 1 0 0;
+    axes_in_j = scale * [0 1 0 0;
                  0 0 1 0;
                  0 0 0 1;
                  1/scale 1/scale 1/scale 1/scale];
     if(ischar(colors))
      colors = colors';
     end
-    axes_in_j = (T_j_from_i*axes_in_i);
+    axes_in_i = (invT(T_j_from_i)*axes_in_j);
     holdstate = ishold;
     hold on
-    plot3([axes_in_j(1,1) axes_in_j(1,2)], [axes_in_j(2,1) axes_in_j(2,2)], ...
-             [axes_in_j(3,1) axes_in_j(3,2)], 'Color', colors(1,:), ...
+    plot3([axes_in_i(1,1) axes_in_i(1,2)], [axes_in_i(2,1) axes_in_i(2,2)], ...
+             [axes_in_i(3,1) axes_in_i(3,2)], 'Color', colors(1,:), ...
              'LineWidth', thickness);
-    plot3([axes_in_j(1,1) axes_in_j(1,3)], [axes_in_j(2,1) axes_in_j(2,3)], ...
-             [axes_in_j(3,1) axes_in_j(3,3)], 'Color', colors(2,:), ...
+    plot3([axes_in_i(1,1) axes_in_i(1,3)], [axes_in_i(2,1) axes_in_i(2,3)], ...
+             [axes_in_i(3,1) axes_in_i(3,3)], 'Color', colors(2,:), ...
              'LineWidth', thickness);
-    plot3([axes_in_j(1,1) axes_in_j(1,4)], [axes_in_j(2,1) axes_in_j(2,4)], ...
-             [axes_in_j(3,1) axes_in_j(3,4)], 'Color', colors(3,:), ...
+    plot3([axes_in_i(1,1) axes_in_i(1,4)], [axes_in_i(2,1) axes_in_i(2,4)], ...
+             [axes_in_i(3,1) axes_in_i(3,4)], 'Color', colors(3,:), ...
              'LineWidth', thickness);
     if ~holdstate
         hold off

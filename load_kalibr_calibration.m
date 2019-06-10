@@ -38,5 +38,6 @@ function [camera_structs] = load_kalibr_calibration(yaml_file)
             camera_structs(i).T_to_c0_from_c = eye(4);
         end
         camera_structs(i).P = [camera_structs(i).K * camera_structs(i).T_to_c0_from_c(1:3,:); 0 0 0 1];
+        camera_structs(i).T_to_c_from_i = reshape(vertcat(tmp.T_cam_imu{:}),4,4);
     end
 end

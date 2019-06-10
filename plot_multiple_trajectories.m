@@ -1,4 +1,4 @@
-function [] = plot_trajectories(trajectories, f, plotrange, stepsize)
+function [] = plot_multiple_trajectories(trajectories, f, plotrange, stepsize)
 %
 % Incrementally plots the motion histories defined by trajectories.
 %
@@ -37,7 +37,7 @@ end
 set(0, 'CurrentFigure', f)
 hold off;
 for j = 1:length(trajectories)
-    plot_trajectory(trajectories{j}(plotrange(1):stepsize:plotrange(2)));
+    plot_single_trajectory(trajectories{j}(plotrange(1):stepsize:plotrange(2)));
     hold on
 end
 
