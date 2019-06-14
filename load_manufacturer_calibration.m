@@ -16,7 +16,7 @@ function [camera_structs] = load_manufacturer_calibration(yaml_file)
 % output:
 %   camera_structs: camera parameters
 %
-    if(~endsWith(yaml_file, 'manufacturer.yaml'))
+    if(~contains(yaml_file, 'manufacturer') || ~endsWith(yaml_file, 'yaml'))
         warning('Are you sure this is a valid manufacturer.yaml file from the Oxford Multimotion Dataset?')
     end
     yaml_struct = ReadYaml(yaml_file);

@@ -16,7 +16,7 @@ function [camera_structs] = load_kalibr_calibration(yaml_file)
 % output:
 %   camera_structs: camera parameters
 %
-    if(~endsWith(yaml_file, 'kalibr.yaml'))
+    if(~contains(yaml_file, 'kalibr') || ~endsWith(yaml_file, 'yaml'))
         warning('Are you sure this is a valid kalibr.yaml file from the Oxford Multimotion Dataset?')
     end
     yaml_struct = ReadYaml(yaml_file);
@@ -33,7 +33,7 @@ function [camera_structs] = load_kalibr_calibration(yaml_file)
                                0 tmp.intrinsics{2} tmp.intrinsics{4};
                                0 0 1];
         if(isfield(tmp,'T_cn_cnm1'))
-            camera_structs(i).T_to_c0_from_c = invT(reshape(vertcat(tmp.T_cn_cnm1{:}),4,4) * camera_structs(i-1).T_to_c0_from_c);
+            camera_structs(i).T_to_c0_from_c = invT(reshape(vertcat(tmp.T_cn_cnm1{:}),4,4) * invT(camera_structs(i-1).T_to_c0_from_c));
         else
             camera_structs(i).T_to_c0_from_c = eye(4);
         end

@@ -16,7 +16,7 @@ function [] = plot_single_trajectory(trajectory)
 
 pts = zeros(4,length(trajectory));
 for i = 1:length(trajectory)
-    pts(:,i) = get_r_j_from_i_in_i_FROM_T_ji(invT(trajectory{i}));
+    pts(:,i) = get_r_j_from_i_in_i_FROM_T_ji(trajectory{i});
 end
 
 plot3(pts(1,1:i),pts(2,1:i),pts(3,1:i))
@@ -77,15 +77,19 @@ function [] = plot_axes3(T_j_from_i, varargin)
     axes_in_i = (invT(T_j_from_i)*axes_in_j);
     holdstate = ishold;
     hold on
-    plot3([axes_in_i(1,1) axes_in_i(1,2)], [axes_in_i(2,1) axes_in_i(2,2)], ...
+    p = plot3([axes_in_i(1,1) axes_in_i(1,2)], [axes_in_i(2,1) axes_in_i(2,2)], ...
              [axes_in_i(3,1) axes_in_i(3,2)], 'Color', colors(1,:), ...
              'LineWidth', thickness);
-    plot3([axes_in_i(1,1) axes_in_i(1,3)], [axes_in_i(2,1) axes_in_i(2,3)], ...
+    set(get(get(p,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
+    p = plot3([axes_in_i(1,1) axes_in_i(1,3)], [axes_in_i(2,1) axes_in_i(2,3)], ...
              [axes_in_i(3,1) axes_in_i(3,3)], 'Color', colors(2,:), ...
              'LineWidth', thickness);
-    plot3([axes_in_i(1,1) axes_in_i(1,4)], [axes_in_i(2,1) axes_in_i(2,4)], ...
+    set(get(get(p,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
+
+    p = plot3([axes_in_i(1,1) axes_in_i(1,4)], [axes_in_i(2,1) axes_in_i(2,4)], ...
              [axes_in_i(3,1) axes_in_i(3,4)], 'Color', colors(3,:), ...
              'LineWidth', thickness);
+    set(get(get(p,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
     if ~holdstate
         hold off
     end
