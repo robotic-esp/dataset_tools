@@ -6,23 +6,24 @@
 %       kjudd@robots.ox.ac.uk, gammell@robots.ox.ac.uk
 
 
-% [vicon_trajectories, vicon_timestamps] = ingest_vicon_data(path_to_vicon_data);
-% T_to_apparatus_from_left_camera = load_vicon_calibration([path_to_calibration 'vicon.yaml']);
-camera_structs = load_kalibr_calibration([path_to_calibration 'kalibr.yaml']);
+[vicon_trajectories, vicon_timestamps] = ingest_vicon_data(path_to_vicon_data);
+T_to_apparatus_from_left_camera = load_vicon_calibration(path_to_vicon_calibration);
+camera_structs_kalibr = load_kalibr_calibration(path_to_kalibr_calibration);
+camera_structs_manufacturer = load_kalibr_calibration(path_to_manufacturer_calibration);
 timestamps = readtable([path_to_images '/stereo.csv']);
 timestamps = timestamps{:,2} + timestamps{:,3}/1e9; 
 
 
 % Projects axes into left stereo image frame. Other image frames can be
 % selected from the calibration.
-T_to_left_camera_from_current_camera = camera_structs(1).T_to_c0_from_c;
+T_to_left_camera_from_current_camera = camera_structs_kalibr(1).T_to_c0_from_c;
 images_format = [path_to_images '/%06d_left.png']; 
 T_to_apparatus_from_current_camera = T_to_apparatus_from_left_camera * T_to_left_camera_from_current_camera;
-fu = camera_structs(1).K(1,1);
-fv = camera_structs(1).K(2,2);
-Cu = camera_structs(1).K(1,3);
-Cv = camera_structs(1).K(2,3);
-baseline = camera_structs(1).K(2,2);
+fu = camera_structs_kalibr(1).K(1,1);
+fv = camera_structs_kalibr(1).K(2,2);
+Cu = camera_structs_kalibr(1).K(1,3);
+Cv = camera_structs_kalibr(1).K(2,3);
+baseline = camera_structs_kalibr(1).K(2,2);
 P_uvd_to_xyz = [1/fu 0 0 -Cu/fu; ...
                 0 1/fv 0 -Cv/fv; ...
                 0 0 0 1; ...
