@@ -1,10 +1,15 @@
 # Tools for datasets published by the Oxford Estimation, Search, and Planning research group.
-```[vicon_trajectories, vicon_timestamps] = ingest_vicon_data('vicon.csv');
-for i = 1:100:length(vicon_trajectories{1})
-    plot_trajectories(vicon_trajectories, f, [1 i]);
-    view(-20, 30)
-    axis([-2 1.5 -6 2 0.5 2.5])
-    drawnow
-end
+Plot Vicon trajectories
+```
+[vicon_trajectories, vicon_timestamps] = ingest_vicon_data('vicon.csv');
+plot_multiple_trajectories(vicon_trajectories);
 ```
 
+Project Vicon frames into cameara images
+```
+path_to_kalibr_calibration = [path_to_dataset 'kalibr_2019_06_14.yaml'];
+path_to_manufacturer_calibration = [path_to_dataset 'manufacturer_2019_06_14.yaml'];
+path_to_vicon_calibration = [path_to_dataset 'vicon_2019_06_14.yaml'];
+path_to_images = [path_to_dataset data_segment];
+draw_axes_on_image;
+```
