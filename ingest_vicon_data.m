@@ -1,4 +1,4 @@
-function [vicon_trajectories, vicon_timestamps] = ingest_vicon_data(filename)
+function [vicon_trajectories, vicon_objects, vicon_timestamps] = ingest_vicon_data(filename)
 %
 % Parses vicon data from input csv into trajectory and timestamp data.
 %
@@ -18,12 +18,12 @@ function [vicon_trajectories, vicon_timestamps] = ingest_vicon_data(filename)
 
 % load vicon data
 vicon_data = readtable(filename);
-vicon_objs = unique(vicon_data.object);
-vicon_trajectories = cell(length(vicon_objs),1);
+vicon_objects = unique(vicon_data.object);
+vicon_trajectories = cell(length(vicon_objects),1);
 
 w = waitbar(0, '');
 for i=1:size(vicon_data,1)
-    ind = find(contains(vicon_objs, vicon_data{i,3}));
+    ind = find(contains(vicon_objects, vicon_data{i,3}));
     vicon_trajectories{ind}{end+1,1} = reshape(vicon_data{i,11:end}',4,4)';
     waitbar(i/size(vicon_data,1),w, [num2str(i) '/' num2str(size(vicon_data,1)) ' entries read']);
 end

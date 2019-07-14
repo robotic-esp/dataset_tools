@@ -6,7 +6,7 @@
 %       kjudd@robots.ox.ac.uk, gammell@robots.ox.ac.uk
 
 
-[vicon_trajectories, vicon_timestamps] = ingest_vicon_data(path_to_vicon_data);
+[vicon_trajectories, vicon_objects, vicon_timestamps] = ingest_vicon_data(path_to_vicon_data);
 T_to_apparatus_from_left_camera = load_vicon_calibration(path_to_vicon_calibration);
 camera_structs_kalibr = load_kalibr_calibration(path_to_kalibr_calibration);
 camera_structs_manufacturer = load_kalibr_calibration(path_to_manufacturer_calibration);
@@ -39,7 +39,7 @@ for index = 1:1000
     end
 
     clf;imshow(imread(sprintf(images_format, index)));
-    for j = 1:length(object_names)-1
+    for j = 1:length(vicon_objects)-1
         T_to_object_from_apparatus = invT(vicon_trajectories{j}{vicon_index}) * (vicon_trajectories{end}{vicon_index});
         T_to_object_from_camera = T_to_object_from_apparatus * T_to_apparatus_from_current_camera;
         plot_uvd_axes(T_to_object_from_camera, P_xyz_to_uvd)
@@ -72,4 +72,14 @@ plot([centroid_uvd(1) new_axes_uvd(1,2)], [centroid_uvd(2) new_axes_uvd(2,2)], '
 plot([centroid_uvd(1) new_axes_uvd(1,3)], [centroid_uvd(2) new_axes_uvd(2,3)], 'Color', 'b', ...
          'LineWidth', thickness);
 drawnow;
+end
+
+
+function [r_j_from_i_in_i] = get_r_j_from_i_in_i_FROM_T_ji(T_ji)
+
+    r_i_from_j_in_j = T_ji(1:3,4);
+    
+    C_ji = T_ji(1:3,1:3);
+    r_j_from_i_in_i = -C_ji' * r_i_from_j_in_j;
+    r_j_from_i_in_i = [r_j_from_i_in_i;1];
 end
