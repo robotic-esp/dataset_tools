@@ -15,7 +15,7 @@ for i = 1:length(trajectory_estimate)
     
     tmp = get_r_j_from_i_in_i_FROM_T_ji(T_err);
 	xyz_err(i,:) = tmp(1:3);
-    rpy_err(i,:) = C2rpy(T_err(1:3,1:3))';
+    rpy_err(i,:) = rotmat_to_rpy(T_err(1:3,1:3))';
 end
 
 if(path_label)
@@ -36,7 +36,7 @@ max_rpy_error = rpy_err(i,:)*180/pi;
 avg_xyz_error = mean(sqrt(sum(xyz_err.^2,2)));
 avg_rpy_error = mean(sqrt(sum(rpy_err.^2,2)));
 
-figure;
+% figure;
 subplot(2,1,1);
 co = [1 0 0; 0 1 0; 0 0 1];
 old_co = get(groot, 'defaultAxesColorOrder');
@@ -99,4 +99,15 @@ for i=2:N
     path_length(i) = path_length(i-1) + sqrt(sum((trajectory_points(:,i) - trajectory_points(:,i-1)).^2));
 end
 
+end
+
+
+function [rpy] = rotmat_to_rpy(C)
+    if ~ismatrix(C) || size(C,1) ~= 3 || size(C,2) ~= 3
+        error('C must be 3x3.')
+    end
+    
+    rpy(3,1) = atan2(C(2,1),C(1,1));
+    rpy(2,1) = atan2(-C(3,1),sqrt(C(3,2)^2 + C(3,3)^2));
+    rpy(1,1) = atan2(C(3,2),C(3,3));
 end
