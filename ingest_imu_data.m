@@ -17,7 +17,7 @@ function [rotation_quaternion, angular_velocity, linear_acceleration, imu_timest
 %   imu_timestamps: Kx1 vector of timestamps
 %
 
-% load vicon data
+% load imu data
 imu_data = readtable(filename);
 linear_acceleration = zeros(size(imu_data,1),3);
 angular_velocity = zeros(size(imu_data,1),3);

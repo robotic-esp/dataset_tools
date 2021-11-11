@@ -1,7 +1,7 @@
 function T_A_from_B = find_alignment_T_A_from_B(transforms_A, transforms_B, allow_translation)
 %   
 % Determines the alignment transform that minimizes the sum of errors
-% between each pair of transforms in A and B.
+% between the trajectories A and B.
 %
 % From: Kevin M. Judd and Jonathan D. Gammell, 
 %       The Oxford Multimotion Dataset: Multiple SE(3) Motions with Ground Truth

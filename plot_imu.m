@@ -62,22 +62,6 @@ for i = 1:10:size(lin_acc,1)
     
     subplot(1,2,2);
     cla;
-% %     R = quaternion_to_rotation_matrix(quaternions(i,:));
-%     C = quat2rotm([quaternions(i,4) quaternions(i,1:3)]);
-%     T = [C [0; 0; 0;]; 0 0 0 1];
-%     plot_axes3((T),0.25);
-% 
-%     grid on;
-%     axis(0.25*[-1 1 -1 1 -1 1]);
-%     xlabel('x');
-%     ylabel('y');
-%     zlabel('z');
-%     title('Rotation');
-%     xticklabels('');
-%     yticklabels('');
-%     zticklabels('');
-%     legend('x-axis','y-axis','z-axis','Location','Northeast');
-%     drawnow;
     hold on
     quiver3(0, 0, 0, ang_vel(i,1), ang_vel(i,3), ang_vel(i,2),'LineWidth',5,'MaxHeadSize',1,'Color','k','Autoscale','off');
     plot3([0 ang_vel(i,1)], [0 0], [0 0],'LineWidth',3,'Color','r');
@@ -96,18 +80,18 @@ end
 end
 
 function [C] = quaternion_to_rotation_matrix(q)
-x = q(1); y = q(2); z = q(3); w = q(4);
-Nq = w*w + x*x + y*y + z*z;
-s = 2.0/Nq;
-X = x*s;
-Y = y*s;
-Z = z*s;
-wX = w*X; wY = w*Y; wZ = w*Z;
-xX = x*X; xY = x*Y; xZ = x*Z;
-yY = y*Y; yZ = y*Z; zZ = z*Z;
-C =  [1.0-(yY+zZ), xY-wZ, xZ+wY;
-      xY+wZ, 1.0-(xX+zZ), yZ-wX;
-      xZ-wY, yZ+wX, 1.0-(xX+yY)];
+    x = q(1); y = q(2); z = q(3); w = q(4);
+    Nq = w*w + x*x + y*y + z*z;
+    s = 2.0/Nq;
+    X = x*s;
+    Y = y*s;
+    Z = z*s;
+    wX = w*X; wY = w*Y; wZ = w*Z;
+    xX = x*X; xY = x*Y; xZ = x*Z;
+    yY = y*Y; yZ = y*Z; zZ = z*Z;
+    C =  [1.0-(yY+zZ), xY-wZ, xZ+wY;
+          xY+wZ, 1.0-(xX+zZ), yZ-wX;
+          xZ-wY, yZ+wX, 1.0-(xX+yY)];
 end
 
 function [] = plot_axes3(T_j_from_i, varargin)

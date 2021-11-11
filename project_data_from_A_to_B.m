@@ -1,7 +1,6 @@
 function [data_in_B] = project_data_from_A_to_B(T_B_from_A, data_in_A)
 %
-% Plots the linear acceleration vector, and rotation quaternion as recorded
-% by the imu.
+% Projects data from frame A into frame B via the passive transform T_BA
 %
 % From: Kevin M. Judd and Jonathan D. Gammell, 
 %       The Oxford Multimotion Dataset: Multiple SE(3) Motions with Ground Truth

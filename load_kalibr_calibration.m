@@ -1,7 +1,7 @@
 function [camera_structs] = load_kalibr_calibration(yaml_file)
 %   
-% Loads the camera calibrations for the sensor % apparatus as estimated by
-% kalibr.
+% Loads the camera calibrations for the sensor apparatus as estimated 
+% by kalibr.
 %
 % NOTE: Depends on yamlmatlab which is freely available at
 %       https://code.google.com/archive/p/yamlmatlab/

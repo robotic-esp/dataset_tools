@@ -1,7 +1,7 @@
 function [Tji] = invT(Tij)
 %   
 % Efficiently computes the blockwise inverse of the SE(3) transform Tij.
-
+%
 % From: Kevin M. Judd and Jonathan D. Gammell, 
 %       The Oxford Multimotion Dataset: Multiple SE(3) Motions with Ground Truth
 %       kjudd@robots.ox.ac.uk, gammell@robots.ox.ac.uk
