@@ -1,43 +1,30 @@
+%
+% Calibrates an estimated VO trajectory (provided by the user in vo_data)
+% to the ground-truth trajectory.
+%
+% From: Kevin M. Judd and Jonathan D. Gammell, 
+%       The Oxford Multimotion Dataset: Multiple SE(3) Motions with Ground Truth
+%       kjudd@robots.ox.ac.uk, gammell@robots.ox.ac.uk
+
+
+path_to_vicon_data = ''; % path to vicon.csv file
+path_to_images = ''; % path to the directory containing the stereo RGB images
+
+
 % load vo data
-vo_data = {eye(4)}; % load in VO data
-vo_timestamps_data = readtable('stereo.csv');
-start_index = 100;
-end_index = start_index + 923;
-vo_timestamps = vo_timestamps_data{start_index:end_index,2} + vo_timestamps_data{start_index:end_index,3}/1e9; 
-vo_data_norm = cell(size(vo_data));
-for i = 2:length(vo_timestamps)
-    vo_data_norm{i-1,1} = orthonormalize_svd(invT(vo_data{i}) * vo_data{start_index});
-end
+vo_data = {eye(4)}; % load in VO estimates
+
+
+start_index = 100; % starting frame index of the estimated data
+end_index = start_index + 923; % final frame index of the estimated data
+timestamps = readtable([path_to_images '/stereo.csv']);
+vo_timestamps = timestamps{start_index:end_index,2} + timestamps{start_index:end_index,3}/1e9; 
 
 % load vicon data
-vicon_data = readtable('vicon.csv');
-vicon_objs = unique(vicon_data.object);
-vicon_trajectory = cell(length(vicon_objs),1);
-
-w = waitbar(0, '');
-for i=1:size(vicon_data,1)
-    ind = find(contains(vicon_objs, vicon_data{i,3}));
-    vicon_trajectory{ind}{end+1,1} = reshape(vicon_data{i,11:end}',4,4)';
-    waitbar(i/size(vicon_data,1),w, '');
-end
-close(w);
-vicon_timestamps = vicon_data{1:length(vicon_trajectory):end,1} + vicon_data{1:length(vicon_trajectory):end,2}/1e9;
+[vicon_trajectories, vicon_objects, vicon_timestamps] = ingest_vicon_data(path_to_vicon_data);
 
 % plot vicon data
-to_plot = cell(size(vicon_trajectory));
-for j = 1:length(vicon_trajectory)
-    to_plot{j} = zeros(4,length(vicon_trajectory{j}));
-    for i=1:length(vicon_trajectory{j})
-        T_W_from_S_j = vicon_trajectory{j}{i};
-        T_S_j_from_W = invT(T_W_from_S_j);
-        to_plot{j}(:,i) = get_r_j_from_i_in_i_FROM_T_ji(T_S_j_from_W);
-    end
-end
-figure(); hold on;
-for j = 1:length(vicon_trajectory)
-    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:))
-end
-axis equal
+plot_multiple_trajectories(vicon_trajectories)
 
 % find vicon transforms corresponding to VO timestamps
 start_vicon = 1;
@@ -45,54 +32,34 @@ while(vo_timestamps(1) > vicon_timestamps(start_vicon))
     start_vicon = start_vicon + 1;
 end
 
+% normalize vicon trajectory to the start of the VO trajectory
 current_vicon = start_vicon;
-vicon_data_norm = cell(length(vicon_trajectory),1);
-for i = 1:length(vo_timestamps)-1
+vicon_data_norm = cell(length(vicon_trajectories),1);
+for i = 1:length(vo_timestamps)
     while(vo_timestamps(i) > vicon_timestamps(current_vicon))
         current_vicon = current_vicon + 1;
     end
     for j = 1:length(vicon_data_norm)
-        vicon_data_norm{j}{end+1,1} = orthonormalize_svd(invT(vicon_trajectory{j}{current_vicon}) * vicon_trajectory{j}{start_vicon});
+        vicon_data_norm{j}{end+1,1} = orthonormalize_svd((vicon_trajectories{j}{current_vicon}) * invT(vicon_trajectories{j}{start_vicon}));
     end
 end
 
 % plot vicon segment matching VO timestamps
-to_plot = cell(size(vicon_data_norm));
-for j = 1:length(vicon_data_norm)
-    to_plot{j} = zeros(4,length(vicon_data_norm{j}));
-    for i=1:length(vicon_data_norm{j})
-        to_plot{j}(:,i) = get_r_j_from_i_in_i_FROM_T_ji(vicon_data_norm{j}{i});
-    end
-end
-figure(); hold on;
-for j = 1:length(vicon_data_norm)
-    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:))
-end
-axis equal
-to_plot = cell(size(vo_data_norm));
-for j = 1:length(vo_data_norm)
-    to_plot{j} = zeros(4,length(vo_data_norm{j}));
-    for i=1:length(vo_data_norm{j})
-        to_plot{j}(:,i) = get_r_j_from_i_in_i_FROM_T_ji(vo_data_norm{j}{i});
-    end
-end
-for j = 1:length(vo_data_norm)
-    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:),'r')
-end
-axis equal
-T_vicon_from_vo = find_alignment_T_A_from_B(vicon_data_norm{1}, vo_data_norm{1}, true);
+plot_multiple_trajectories(vicon_data_norm)
 
-% plot transformed vicon segment with VO segment
-to_plot = cell(size(vo_data_norm));
-for j = 1:length(vo_data_norm)
-    to_plot{j} = zeros(4,length(vo_data_norm{j}));
-    for i=1:length(vo_data_norm{j})
-        to_plot{j}(:,i) = get_r_j_from_i_in_i_FROM_T_ji(T_vicon_from_vo * vo_data_norm{j}{i} * invT(T_vicon_from_vo));
-    end
+
+% find the calibration for the VO, which should be similar to the provided
+% T_to_apparatus_from_cam (T_AL)
+T_vicon_from_vo = find_alignment_T_A_from_B(vicon_data_norm{end}, vo_data, true); 
+
+% plot transformed VO segment with vicon segment
+calibrated_vo = vo_data;
+for i=1:length(vo_data)
+    calibrated_vo{i} = (T_vicon_from_vo * vo_data{i} * invT(T_vicon_from_vo));
 end
-hold on;
-for j = 1:length(vo_data_norm)
-    plot3(to_plot{j}(1,:),to_plot{j}(2,:),to_plot{j}(3,:),'g')
-end
-axis equal
+plot_multiple_trajectories([vicon_data_norm(end), {calibrated_vo}]);
+
+% compare errors
+[max_xyz_error, max_xyz_percent_error, max_rpy_error] = compare_estimate_to_ground_truth(vo_data, vicon_data_norm{end}, invT(T_vicon_from_vo))
+
 

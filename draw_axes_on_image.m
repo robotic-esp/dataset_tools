@@ -5,11 +5,18 @@
 %       The Oxford Multimotion Dataset: Multiple SE(3) Motions with Ground Truth
 %       kjudd@robots.ox.ac.uk, gammell@robots.ox.ac.uk
 
+% User must set these paths
+path_to_vicon_data = ''; % path to vicon.csv file
+path_to_vicon_calibration = ''; % path to vicon.yaml calibration file
+% path_to_kalibr_calibration = '';% path to kalibr.yaml calibration file
+path_to_manufacturer_calibration = ''; % path to manufacturer.yaml calibration file
+path_to_images = ''; % path to the directory containing the stereo RGB images
+
 
 [vicon_trajectories, vicon_objects, vicon_timestamps] = ingest_vicon_data(path_to_vicon_data);
 T_to_apparatus_from_left_camera = load_vicon_calibration(path_to_vicon_calibration);
 camera_structs_kalibr = load_kalibr_calibration(path_to_kalibr_calibration);
-camera_structs_manufacturer = load_kalibr_calibration(path_to_manufacturer_calibration);
+% camera_structs_manufacturer = load_kalibr_calibration(path_to_manufacturer_calibration);
 timestamps = readtable([path_to_images '/stereo.csv']);
 timestamps = timestamps{:,2} + timestamps{:,3}/1e9; 
 
