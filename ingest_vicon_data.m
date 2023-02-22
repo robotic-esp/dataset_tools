@@ -16,16 +16,29 @@ function [vicon_trajectories, vicon_objects, vicon_timestamps] = ingest_vicon_da
 %   vicon_timestamps: Kx1 vector of timestamps
 %
 
+w = waitbar(0, 'Opening file');
+
 % load vicon data
 vicon_data = readtable(filename);
 vicon_objects = unique(vicon_data.object);
 vicon_trajectories = cell(length(vicon_objects),1);
 
-w = waitbar(0, '');
+w = waitbar(0, w, ['0/' num2str(size(vicon_data,1)) ' entries read']);
+
+% preallocate
+for i=1:length(vicon_trajectories)
+    vicon_trajectories{i} = cell(size(vicon_data,1)/length(vicon_trajectories),1);
+    [vicon_trajectories{i}{:,1}] = deal(zeros(4,4)); % See: help deal
+end
+write_idx = zeros(length(vicon_trajectories),1);
+
 for i=1:size(vicon_data,1)
     ind = find(contains(vicon_objects, vicon_data{i,3}));
-    vicon_trajectories{ind}{end+1,1} = reshape(vicon_data{i,11:end}',4,4)';
-    waitbar(i/size(vicon_data,1),w, [num2str(i) '/' num2str(size(vicon_data,1)) ' entries read']);
+    write_idx(ind) = write_idx(ind) + 1;
+    vicon_trajectories{ind}{write_idx(ind),1} = reshape(vicon_data{i,11:end}',4,4)';
+    if mod(i,100) == 0 || i == size(vicon_data,1)
+        waitbar(i/size(vicon_data,1), w, [num2str(i) '/' num2str(size(vicon_data,1)) ' entries read']);
+    end
 end
 close(w);
 vicon_timestamps = vicon_data{1:length(vicon_trajectories):end,1} + vicon_data{1:length(vicon_trajectories):end,2}/1e9;
