@@ -58,7 +58,7 @@ for index = 1:1000
     clf;
     imshow(imread(sprintf(images_format, index)));
     for j = 1:length(vicon_objects)-1
-        T_to_object_from_apparatus = invT(vicon_trajectories{j}{vicon_index}) * (vicon_trajectories{end}{vicon_index});
+        T_to_object_from_apparatus = vicon_trajectories{j}{vicon_index} * invT(vicon_trajectories{end}{vicon_index});
         T_to_object_from_camera = T_to_object_from_apparatus * T_to_apparatus_from_current_camera;
         plot_uvd_axes(T_to_object_from_camera, P_xyz_to_uvd)
     end
