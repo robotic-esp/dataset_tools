@@ -111,3 +111,12 @@ function [rpy] = rotmat_to_rpy(C)
     rpy(2,1) = atan2(-C(3,1),sqrt(C(3,2)^2 + C(3,3)^2));
     rpy(1,1) = atan2(C(3,2),C(3,3));
 end
+
+function [r_j_from_i_in_i] = get_r_j_from_i_in_i_FROM_T_ji(T_ji)
+
+    r_i_from_j_in_j = T_ji(1:3,4);
+    
+    C_ji = T_ji(1:3,1:3);
+    r_j_from_i_in_i = -C_ji' * r_i_from_j_in_j;
+    r_j_from_i_in_i = [r_j_from_i_in_i;1];
+end
