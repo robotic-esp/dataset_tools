@@ -74,11 +74,11 @@ ylim(ylimits_rad./pi.*180)
 ylabel('Rot. Error (deg)')
 legend({'roll','pitch','yaw'}, 'Location', 'Northwest', 'Orientation','horizontal');
 box off
-if(path_label)
+% if(path_label)
     xlabel('Path Length (m)')
-else
-    xlabel('Frames')
-end
+% else
+%     xlabel('Frames')
+% end
 xlim([0, path(end)]);
 
 linkaxes([subplot(2,1,1),subplot(2,1,2)], 'x');
