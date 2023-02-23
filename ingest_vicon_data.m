@@ -35,7 +35,7 @@ write_idx = zeros(length(vicon_trajectories),1);
 for i=1:size(vicon_data,1)
     ind = find(contains(vicon_objects, vicon_data{i,3}));
     write_idx(ind) = write_idx(ind) + 1;
-    vicon_trajectories{ind}{write_idx(ind),1} = reshape(vicon_data{i,11:end}',4,4)';
+    vicon_trajectories{ind}{write_idx(ind),1} = invT(reshape(vicon_data{i,11:end},4,4)');
     if mod(i,100) == 0 || i == size(vicon_data,1)
         waitbar(i/size(vicon_data,1), w, [num2str(i) '/' num2str(size(vicon_data,1)) ' entries read']);
     end
