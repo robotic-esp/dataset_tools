@@ -21,17 +21,10 @@ vicon_data = readtable(filename);
 vicon_objects = unique(vicon_data.object);
 vicon_trajectories = cell(length(vicon_objects),1);
 
-w = waitbar(0, ['0/' num2str(size(vicon_data,1)) ' entries read']);
-
-% preallocate
-for i=1:length(vicon_trajectories)
-    vicon_trajectories{i} = cell(size(vicon_data,1)/length(vicon_trajectories),1);
-    [vicon_trajectories{i}{:,1}] = deal(zeros(4,4)); % See: help deal
-end
-
+w = waitbar(0, '');
 for i=1:size(vicon_data,1)
     ind = find(contains(vicon_objects, vicon_data{i,3}));
-    vicon_trajectories{ind}{i,1} = reshape(vicon_data{i,11:end}',4,4)';
+    vicon_trajectories{ind}{end+1,1} = reshape(vicon_data{i,11:end}',4,4)';
     waitbar(i/size(vicon_data,1),w, [num2str(i) '/' num2str(size(vicon_data,1)) ' entries read']);
 end
 close(w);
